@@ -12,7 +12,7 @@ Deploys the **OpenShift Virtualization console UI stack** without the HCO/CNV ba
 | ConsolePlugin | `kubevirt-plugin` |
 | Role / RoleBinding | `kubevirt-ui-config-reader` (authenticated users → UI configmaps) |
 
-Optional: NetworkPolicies (when `networkPolicy.enabled`), Route for external proxy access (`route.enabled`), post-install Console operator plugin registration (`console.registerPlugin`).
+Optional: NetworkPolicies (when `networkPolicy.enabled`). A Route for apiserver-proxy is **on by default** (`route.enabled`); disable it if you only use in-cluster ConsolePlugin proxy. Post-install console registration: `console.registerPlugin`.
 
 ## Prerequisites
 

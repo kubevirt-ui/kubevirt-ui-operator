@@ -67,9 +67,10 @@ networkPolicy:
   enabled: false
 
 route:
-  # External Route for apiserver-proxy (dev / off-cluster console). Not required when
-  # using the in-cluster OpenShift console (ConsolePlugin proxy uses the Service).
-  enabled: false
+  # Public Route for kubevirt-apiserver-proxy (same host pattern as CNV/HCO:
+  # kubevirt-apiserver-proxy.<apps domain>). Leave host empty to let OpenShift assign one.
+  # Disable on clusters where only in-cluster ConsolePlugin proxy is used.
+  enabled: true
   name: kubevirt-apiserver-proxy
   host: ''
 
