@@ -1,0 +1,25 @@
+apiVersion: console.openshift.io/v1
+kind: ConsolePlugin
+metadata:
+  name: {{ .Values.consolePlugin.name }}
+  labels:
+    {{- include "kubevirt-console-ui.baseLabels" . | nindent 4 }}
+    app.kubernetes.io/component: kubevirt-console-plugin
+spec:
+  displayName: {{ .Values.consolePlugin.displayName | quote }}
+  backend:
+    type: Service
+    service:
+      name: {{ .Values.plugin.serviceName }}
+      namespace: {{ include "kubevirt-console-ui.namespace" . }}
+      port: {{ .Values.plugin.port }}
+      basePath: /
+  proxy:
+    - alias: {{ .Values.consolePlugin.proxyAlias }}
+      authorization: UserToken
+      endpoint:
+        type: Service
+        service:
+          name: {{ .Values.proxy.serviceName }}
+          namespace: {{ include "kubevirt-console-ui.namespace" . }}
+          port: {{ .Values.proxy.port }}

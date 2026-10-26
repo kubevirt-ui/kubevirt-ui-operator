@@ -1,0 +1,90 @@
+# KubeVirt UI Operator
+
+Kubernetes operator and install assets for the **OpenShift Virtualization console UI** stack: the dynamic plugin, apiserver-proxy, UI configuration, and everything the cluster needs to run the KubeVirt UI **without** owning the virtualization backend (KubeVirt, CDI, CNAO, and the rest of the CNV/HCO operands).
+
+Today this repository ships a **Helm chart** that matches what the [HyperConverged Cluster Operator](https://github.com/kubevirt/hyperconverged-cluster-operator) reconciles for UI ([`kubevirtConsolePlugin.go`](https://github.com/kubevirt/hyperconverged-cluster-operator/blob/main/controllers/handlers/kubevirtConsolePlugin.go)). The **operator controller** will live here next and become the long-term way to install, upgrade, and reconcile those resources.
+
+## Why this repo exists
+
+| Layer | Owned by | This repo |
+|-------|----------|-----------|
+| VM / storage / network control plane | CNV, HCO, KubeVirt, CDI, … | No |
+| Console plugin + proxy + UI config | Today: HCO when CNV is installed | **Yes** (Helm now, operator soon) |
+| Plugin source (React) | [kubevirt-plugin](https://github.com/kubevirt-ui/kubevirt-plugin) | No (consumes published images) |
+| Proxy implementation | [kubevirt-apiserver-proxy](https://github.com/kubevirt-ui/kubevirt-apiserver-proxy) | No (consumes published images) |
+
+Use this project when you want the **same UI experience as OpenShift Virtualization** on a cluster that already has (or will have) a KubeVirt API, but you do not want HCO to own the console plugin deployment—for example custom distributions, dev clusters, or splitting UI lifecycle from CNV upgrades.
+
+## What will be managed
+
+The operator (and today’s Helm chart) target the **UI operands only**:
+
+- **Deployments**: `kubevirt-console-plugin`, `kubevirt-apiserver-proxy`
+- **Services** with OpenShift serving certificates
+- **ConfigMaps**: `nginx-conf`, `kubevirt-user-settings`, `kubevirt-ui-features`
+- **ConsolePlugin** CR: `kubevirt-plugin` (backend service + proxy to apiserver-proxy)
+- **RBAC**: UI config reader Role/RoleBinding for authenticated console users
+- **Optional**: NetworkPolicies, Route for off-cluster console, registration of the plugin on `consoles.operator.openshift.io/cluster`
+
+The operator will **not** install virt-api, virt-controller, CDI, subscriptions, or `HyperConverged`—only the console-facing slice.
+
+## Repository layout
+
+```text
+kubevirt-ui-operator/
+├── README.md
+├── LICENSE
+└── helm/
+    └── kubevirt-console-ui/    # Standalone Helm install (HCO-aligned manifests)
+```
+
+Planned additions (not in tree yet):
+
+```text
+├── api/                        # CRD(s) for UI deployment configuration
+├── controllers/                # Reconcile loop (parity with HCO UI handlers)
+├── config/                     # OLM bundle / kustomize / manager manifests
+└── hack/                       # Dev tooling
+```
+
+## Quick start (Helm)
+
+Prerequisites:
+
+- OpenShift with Console operator and `ConsolePlugin` CRD
+- Namespace `openshift-cnv` (or override in values)—do **not** install on top of an existing HCO-managed UI in the same namespace
+- KubeVirt API available to users (RBAC + running control plane)
+- Container images for plugin and proxy (pin to your CNV/HCO versions when possible)
+
+```bash
+helm upgrade --install kubevirt-ui ./helm/kubevirt-console-ui \
+  --namespace openshift-cnv \
+  --create-namespace \
+  --set plugin.image=quay.io/kubevirt-ui/kubevirt-plugin:<tag> \
+  --set proxy.image=quay.io/kubevirt-ui/kubevirt-apiserver-proxy:<tag>
+```
+
+Image references used by HCO are defined in [`deploy/images.env`](https://github.com/kubevirt/hyperconverged-cluster-operator/blob/main/deploy/images.env) (`KUBEVIRT_CONSOLE_PLUGIN_IMAGE`, `KUBEVIRT_CONSOLE_PROXY_IMAGE`).
+
+Full chart documentation: [`helm/kubevirt-console-ui/README.md`](helm/kubevirt-console-ui/README.md).
+
+## Roadmap
+
+1. **Helm chart** (current): install and document UI-only stack; align names/labels with HCO for easier migration.
+2. **API + controller**: reconcile the same resources from a custom resource (image overrides, replicas, TLS, network policy, console registration).
+3. **OLM packaging**: ClusterServiceVersion for install via Operator Lifecycle Manager where appropriate.
+4. **Integration**: optional coordination with [kubevirt-plugin](https://github.com/kubevirt-ui/kubevirt-plugin) release process for default image tags and compatibility matrix.
+
+## Related projects
+
+- [kubevirt-ui/kubevirt-plugin](https://github.com/kubevirt-ui/kubevirt-plugin) — OpenShift Console dynamic plugin (UI source)
+- [kubevirt-ui/kubevirt-apiserver-proxy](https://github.com/kubevirt-ui/kubevirt-apiserver-proxy) — API proxy used by the plugin for large-cluster list/filter behavior
+- [kubevirt/hyperconverged-cluster-operator](https://github.com/kubevirt/hyperconverged-cluster-operator) — upstream owner of the same UI operands in full CNV installs
+
+## Contributing
+
+Issues and pull requests are welcome. For chart-only changes, test with `helm template` and an OpenShift cluster smoke install. Operator work should follow the standard kubebuilder/operator-sdk patterns once the scaffold lands.
+
+## License
+
+See [LICENSE](LICENSE).

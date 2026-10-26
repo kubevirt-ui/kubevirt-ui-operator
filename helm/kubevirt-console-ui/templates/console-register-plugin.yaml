@@ -1,0 +1,78 @@
+{{- if .Values.console.registerPlugin }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "kubevirt-console-ui.name" . }}-console-plugin-register
+  labels:
+    {{- include "kubevirt-console-ui.baseLabels" . | nindent 4 }}
+rules:
+  - apiGroups: ['operator.openshift.io']
+    resources: ['consoles']
+    resourceNames: ['cluster']
+    verbs: ['get', 'patch', 'update']
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "kubevirt-console-ui.name" . }}-console-plugin-register
+  labels:
+    {{- include "kubevirt-console-ui.baseLabels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "kubevirt-console-ui.name" . }}-console-plugin-register
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "kubevirt-console-ui.name" . }}-console-plugin-register
+    namespace: {{ include "kubevirt-console-ui.namespace" . }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "kubevirt-console-ui.name" . }}-console-plugin-register
+  namespace: {{ include "kubevirt-console-ui.namespace" . }}
+  labels:
+    {{- include "kubevirt-console-ui.baseLabels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-weight: '5'
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "kubevirt-console-ui.name" . }}-register-console-plugin
+  namespace: {{ include "kubevirt-console-ui.namespace" . }}
+  labels:
+    {{- include "kubevirt-console-ui.baseLabels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-weight: '10'
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 6
+  template:
+    spec:
+      serviceAccountName: {{ include "kubevirt-console-ui.name" . }}-console-plugin-register
+      restartPolicy: OnFailure
+      containers:
+        - name: register
+          image: quay.io/openshift/origin-cli:latest
+          command:
+            - /bin/bash
+            - -ec
+            - |
+              PLUGIN="{{ .Values.consolePlugin.name }}"
+              CURRENT="$(oc get consoles.operator.openshift.io cluster -o jsonpath='{.spec.plugins[*]}' 2>/dev/null || true)"
+              if echo " ${CURRENT} " | grep -q " ${PLUGIN} "; then
+                echo "Console plugin ${PLUGIN} already enabled"
+                exit 0
+              fi
+              oc patch consoles.operator.openshift.io cluster --type=json \
+                -p="[{\"op\": \"add\", \"path\": \"/spec/plugins/-\", \"value\": \"${PLUGIN}\"}]"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ['ALL']
+            runAsNonRoot: true
+{{- end }}

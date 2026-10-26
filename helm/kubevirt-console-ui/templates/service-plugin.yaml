@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.plugin.serviceName }}
+  namespace: {{ include "kubevirt-console-ui.namespace" . }}
+  labels:
+    {{- include "kubevirt-console-ui.baseLabels" . | nindent 4 }}
+    app.kubernetes.io/component: kubevirt-console-plugin
+  annotations:
+    service.beta.openshift.io/serving-cert-secret-name: {{ .Values.plugin.servingCertSecret }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "kubevirt-console-ui.pluginSelectorLabels" . | nindent 4 }}
+  ports:
+    - name: {{ .Values.plugin.name }}-port
+      port: {{ .Values.plugin.port }}
+      targetPort: {{ .Values.plugin.port }}
+      protocol: TCP

@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.plugin.name }}
+  namespace: {{ include "kubevirt-console-ui.namespace" . }}
+  labels:
+    {{- include "kubevirt-console-ui.baseLabels" . | nindent 4 }}
+    app.kubernetes.io/component: kubevirt-console-plugin
+spec:
+  replicas: {{ .Values.plugin.replicas }}
+  selector:
+    matchLabels:
+      {{- include "kubevirt-console-ui.pluginSelectorLabels" . | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  template:
+    metadata:
+      labels:
+        {{- include "kubevirt-console-ui.pluginSelectorLabels" . | nindent 8 }}
+        {{- include "kubevirt-console-ui.baseLabels" . | nindent 8 }}
+      annotations:
+        openshift.io/required-scc: restricted-v2
+    spec:
+      serviceAccountName: {{ .Values.plugin.name }}
+      {{- with .Values.plugin.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: {{ .Values.plugin.name }}
+          image: {{ required "plugin.image is required" .Values.plugin.image | quote }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: https
+              containerPort: {{ .Values.plugin.port }}
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 10m
+              memory: 100Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ['ALL']
+          volumeMounts:
+            - name: {{ .Values.plugin.servingCertSecret }}
+              mountPath: /var/serving-cert
+              readOnly: true
+            - name: {{ .Values.config.nginxConfigMapName }}
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+      volumes:
+        - name: {{ .Values.plugin.servingCertSecret }}
+          secret:
+            secretName: {{ .Values.plugin.servingCertSecret }}
+            defaultMode: 420
+        - name: {{ .Values.config.nginxConfigMapName }}
+          configMap:
+            name: {{ .Values.config.nginxConfigMapName }}
