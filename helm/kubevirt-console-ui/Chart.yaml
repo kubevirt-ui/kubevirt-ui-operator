@@ -1,0 +1,9 @@
+apiVersion: v2
+name: kubevirt-console-ui
+description: >-
+  OpenShift Console UI stack for KubeVirt (console plugin, apiserver-proxy,
+  and UI configmaps) as deployed by the HyperConverged Cluster Operator,
+  without the virtualization backend operands.
+type: application
+version: 0.1.0
+appVersion: '1.0.0'

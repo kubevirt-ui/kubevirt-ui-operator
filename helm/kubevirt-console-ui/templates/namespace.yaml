@@ -1,0 +1,8 @@
+{{- if .Values.createNamespace }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ include "kubevirt-console-ui.namespace" . }}
+  labels:
+    {{- include "kubevirt-console-ui.baseLabels" . | nindent 4 }}
+{{- end }}

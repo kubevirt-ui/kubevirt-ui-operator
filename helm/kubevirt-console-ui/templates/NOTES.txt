@@ -1,0 +1,40 @@
+KubeVirt Console UI installed in namespace {{ include "kubevirt-console-ui.namespace" . }}.
+
+Resources mirror HCO UI operands:
+  - Deployments: {{ .Values.plugin.name }}, {{ .Values.proxy.name }}
+  - Services (TLS serving certs): {{ .Values.plugin.serviceName }}, {{ .Values.proxy.serviceName }}
+  - ConfigMaps: {{ .Values.config.nginxConfigMapName }}, {{ .Values.config.userSettingsConfigMapName }}, {{ .Values.config.featuresConfigMapName }}
+  - ConsolePlugin: {{ .Values.consolePlugin.name }}
+
+Verify:
+  oc -n {{ include "kubevirt-console-ui.namespace" . }} get deploy,svc,cm,consoleplugin {{ .Values.consolePlugin.name }}
+  oc get consoleplugin {{ .Values.consolePlugin.name }}
+
+{{- if not .Values.console.registerPlugin }}
+
+Enable the plugin on the cluster console (if not already), preserving other plugins:
+  PLUGIN='{{ .Values.consolePlugin.name }}'
+  CURRENT="$(oc get consoles.operator.openshift.io cluster -o jsonpath='{.spec.plugins[*]}' 2>/dev/null || true)"
+  if echo " ${CURRENT} " | grep -q " ${PLUGIN} "; then
+    echo "Console plugin ${PLUGIN} already enabled"
+  elif [ -z "$(oc get consoles.operator.openshift.io cluster -o jsonpath='{.spec.plugins}' 2>/dev/null || true)" ]; then
+    oc patch consoles.operator.openshift.io cluster --type=merge \
+      -p="{\"spec\":{\"plugins\":[\"${PLUGIN}\"]}}"
+  else
+    oc patch consoles.operator.openshift.io cluster --type=json \
+      -p="[{\"op\": \"add\", \"path\": \"/spec/plugins/-\", \"value\": \"${PLUGIN}\"}]"
+  fi
+{{- end }}
+
+Prerequisites:
+  - OpenShift serving certificate operator (Service serving cert secrets)
+  - KubeVirt API available to end users (this chart does not install virt-api/virt-controller)
+  - Do not install alongside CNV/HCO UI operands in the same namespace (resource name conflict)
+
+{{- if .Values.route.enabled }}
+
+Apiserver proxy route: {{ .Values.route.name }} (host: {{ default "<auto>" .Values.route.host }})
+{{- else }}
+
+For off-cluster / local console development, enable route.proxy or run route-console.sh against the cluster.
+{{- end }}

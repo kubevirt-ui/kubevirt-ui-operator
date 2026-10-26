@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.proxy.name }}
+  namespace: {{ include "kubevirt-console-ui.namespace" . }}
+  labels:
+    {{- include "kubevirt-console-ui.baseLabels" . | nindent 4 }}
+    app.kubernetes.io/component: kubevirt-apiserver-proxy
+spec:
+  replicas: {{ .Values.proxy.replicas }}
+  selector:
+    matchLabels:
+      {{- include "kubevirt-console-ui.proxySelectorLabels" . | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  template:
+    metadata:
+      labels:
+        {{- include "kubevirt-console-ui.proxySelectorLabels" . | nindent 8 }}
+        {{- include "kubevirt-console-ui.baseLabels" . | nindent 8 }}
+      annotations:
+        openshift.io/required-scc: restricted-v2
+    spec:
+      serviceAccountName: {{ .Values.proxy.name }}
+      {{- with .Values.proxy.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: {{ .Values.proxy.name }}
+          image: {{ required "proxy.image is required" .Values.proxy.image | quote }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: https
+              containerPort: {{ .Values.proxy.port }}
+              protocol: TCP
+          {{- with .Values.proxy.tlsArgs }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            requests:
+              cpu: 10m
+              memory: 100Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ['ALL']
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: {{ .Values.proxy.servingCertSecret }}
+              mountPath: /app/cert
+              readOnly: true
+      volumes:
+        - name: {{ .Values.proxy.servingCertSecret }}
+          secret:
+            secretName: {{ .Values.proxy.servingCertSecret }}
+            defaultMode: 420

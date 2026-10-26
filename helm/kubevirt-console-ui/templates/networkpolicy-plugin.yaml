@@ -1,0 +1,28 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kubevirt-console-plugin-np
+  namespace: {{ include "kubevirt-console-ui.namespace" . }}
+  labels:
+    {{- include "kubevirt-console-ui.baseLabels" . | nindent 4 }}
+    app.kubernetes.io/component: kubevirt-console-plugin
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "kubevirt-console-ui.pluginSelectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: openshift-console
+          podSelector:
+            matchLabels:
+              app: console
+              component: ui
+      ports:
+        - protocol: TCP
+          port: {{ .Values.plugin.port }}
+{{- end }}

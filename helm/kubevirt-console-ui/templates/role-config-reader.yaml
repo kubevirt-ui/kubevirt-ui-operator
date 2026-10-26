@@ -1,0 +1,17 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Values.rbac.configReaderRoleName }}
+  namespace: {{ include "kubevirt-console-ui.namespace" . }}
+  labels:
+    {{- include "kubevirt-console-ui.baseLabels" . | nindent 4 }}
+    app.kubernetes.io/component: kubevirt-console-plugin
+rules:
+  - apiGroups: ['']
+    resources: ['configmaps']
+    resourceNames: [{{ .Values.config.userSettingsConfigMapName | quote }}]
+    verbs: ['get', 'update', 'patch']
+  - apiGroups: ['']
+    resources: ['configmaps']
+    resourceNames: [{{ .Values.config.featuresConfigMapName | quote }}]
+    verbs: ['get']

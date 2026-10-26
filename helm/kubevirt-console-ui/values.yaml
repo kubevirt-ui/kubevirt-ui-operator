@@ -1,0 +1,69 @@
+# Target namespace (CNV installs UI into openshift-cnv).
+namespace: openshift-cnv
+createNamespace: false
+
+# Match HCO/CNV labels so resources align with operator-managed installs.
+hcoLabels:
+  enabled: true
+  app: kubevirt-hyperconverged
+  managedBy: hco-operator
+  partOf: hyperconverged-cluster
+  version: ''
+
+plugin:
+  name: kubevirt-console-plugin
+  image: quay.io/kubevirt-ui/kubevirt-plugin:latest
+  port: 9443
+  replicas: 1
+  serviceName: kubevirt-console-plugin-service
+  servingCertSecret: plugin-serving-cert
+  priorityClassName: kubevirt-cluster-critical
+
+proxy:
+  name: kubevirt-apiserver-proxy
+  image: quay.io/kubevirt-ui/kubevirt-apiserver-proxy:latest
+  port: 8080
+  replicas: 1
+  serviceName: kubevirt-apiserver-proxy-service
+  servingCertSecret: console-proxy-serving-cert
+  priorityClassName: kubevirt-cluster-critical
+  # Optional TLS flags passed to the proxy container (HCO sets these from cluster TLS profile).
+  tlsArgs: []
+
+consolePlugin:
+  name: kubevirt-plugin
+  displayName: Kubevirt Console Plugin
+  proxyAlias: kubevirt-apiserver-proxy
+
+config:
+  nginxConfigMapName: nginx-conf
+  userSettingsConfigMapName: kubevirt-user-settings
+  featuresConfigMapName: kubevirt-ui-features
+  features:
+    automaticSubscriptionActivationKey: ''
+    automaticSubscriptionOrganizationId: ''
+    disabledGuestSystemLogsAccess: 'false'
+    kubevirtApiserverProxy: 'true'
+    loadBalancerEnabled: 'true'
+    nodePortAddress: ''
+    nodePortEnabled: 'false'
+    ipStackType: ''
+    hcoVersion: ''
+
+console:
+  # Patch consoles.operator.openshift.io/cluster to enable the plugin (same as HCO).
+  registerPlugin: true
+
+networkPolicy:
+  enabled: false
+
+route:
+  # External Route for apiserver-proxy (dev / off-cluster console). Not required when
+  # using the in-cluster OpenShift console (ConsolePlugin proxy uses the Service).
+  enabled: false
+  name: kubevirt-apiserver-proxy
+  host: ''
+
+rbac:
+  configReaderRoleName: kubevirt-ui-config-reader
+  configReaderRoleBindingName: kubevirt-ui-config-reader-rolebinding
