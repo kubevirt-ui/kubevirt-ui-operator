@@ -10,6 +10,15 @@ hcoLabels:
   partOf: hyperconverged-cluster
   version: ''
 
+# Cluster-scoped scheduling priority (same name/value as KubeVirt virt-operator).
+# Set create: false when CNV/KubeVirt already installed the PriorityClass.
+priorityClass:
+  create: true
+  name: kubevirt-cluster-critical
+  value: 1000000000
+  description: Priority class for critical KubeVirt and virtualization UI components
+  preemptionPolicy: PreemptLowerPriority
+
 plugin:
   name: kubevirt-console-plugin
   image: quay.io/kubevirt-ui/kubevirt-plugin:latest

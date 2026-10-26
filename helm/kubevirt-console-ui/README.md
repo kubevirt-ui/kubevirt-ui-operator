@@ -42,6 +42,7 @@ Pin images to the same versions shipped with your CNV release (see HCO `deploy/i
 | `route.enabled` + `route.host` | Public Route for apiserver-proxy (local/off-cluster console) |
 | `console.registerPlugin` | Helm hook patches `consoles.operator.openshift.io/cluster` |
 | `hcoLabels.enabled` | Label resources like HCO (`app: kubevirt-hyperconverged`, and so on) |
+| `priorityClass.create` | Install `kubevirt-cluster-critical` (required for UI-only clusters; set `false` if KubeVirt already created it) |
 
 ## Uninstall
 

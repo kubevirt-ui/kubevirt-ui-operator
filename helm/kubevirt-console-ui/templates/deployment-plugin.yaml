@@ -25,7 +25,8 @@ spec:
         openshift.io/required-scc: restricted-v2
     spec:
       serviceAccountName: {{ .Values.plugin.name }}
-      {{- with .Values.plugin.priorityClassName }}
+      {{- $priorityClass := .Values.plugin.priorityClassName | default .Values.priorityClass.name }}
+      {{- with $priorityClass }}
       priorityClassName: {{ . }}
       {{- end }}
       securityContext:
