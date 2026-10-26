@@ -33,10 +33,6 @@ metadata:
   namespace: {{ include "kubevirt-console-ui.namespace" . }}
   labels:
     {{- include "kubevirt-console-ui.baseLabels" . | nindent 4 }}
-  annotations:
-    helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-weight: '5'
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 ---
 apiVersion: batch/v1
 kind: Job
@@ -68,8 +64,16 @@ spec:
                 echo "Console plugin ${PLUGIN} already enabled"
                 exit 0
               fi
-              oc patch consoles.operator.openshift.io cluster --type=json \
-                -p="[{\"op\": \"add\", \"path\": \"/spec/plugins/-\", \"value\": \"${PLUGIN}\"}]"
+              HAS_PLUGINS="$(oc get consoles.operator.openshift.io cluster -o jsonpath='{.spec.plugins}' 2>/dev/null || true)"
+              if [ -z "${HAS_PLUGINS}" ]; then
+                echo "Initializing spec.plugins with ${PLUGIN}"
+                oc patch consoles.operator.openshift.io cluster --type=merge \
+                  -p="{\"spec\":{\"plugins\":[\"${PLUGIN}\"]}}"
+              else
+                echo "Appending ${PLUGIN} to spec.plugins"
+                oc patch consoles.operator.openshift.io cluster --type=json \
+                  -p="[{\"op\": \"add\", \"path\": \"/spec/plugins/-\", \"value\": \"${PLUGIN}\"}]"
+              fi
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
