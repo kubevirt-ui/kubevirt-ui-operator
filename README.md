@@ -34,6 +34,9 @@ The operator will **not** install virt-api, virt-controller, CDI, subscriptions,
 kubevirt-ui-operator/
 ├── README.md
 ├── LICENSE
+├── docs/
+│   ├── ROADMAP.md              # Operator delivery plan and prerequisites
+│   └── design/                 # API RFCs
 └── helm/
     └── kubevirt-console-ui/    # Standalone Helm install (HCO-aligned manifests)
 ```
@@ -51,10 +54,12 @@ Planned additions (not in tree yet):
 
 Prerequisites:
 
-- OpenShift with Console operator and `ConsolePlugin` CRD
+- **OpenShift Console:** Console Operator healthy, `ConsolePlugin` CRD (`console.openshift.io`), console UI running in `openshift-console`; cluster admin or equivalent if enabling automatic plugin registration on `consoles.operator.openshift.io/cluster`
 - Namespace `openshift-cnv` (or override in values)—do **not** install on top of an existing HCO-managed UI in the same namespace
 - KubeVirt API available to users (RBAC + running control plane)
 - Container images for plugin and proxy (pin to your CNV/HCO versions when possible)
+
+Full prerequisite list: [docs/ROADMAP.md#prerequisites-cluster-and-console](docs/ROADMAP.md#prerequisites-cluster-and-console).
 
 ```bash
 helm upgrade --install kubevirt-ui ./helm/kubevirt-console-ui \
@@ -70,6 +75,8 @@ Full chart documentation: [`helm/kubevirt-console-ui/README.md`](helm/kubevirt-c
 
 ## Roadmap
 
+Detailed plan (phases, prerequisites including **OpenShift Console**, milestones, and team workflow): **[docs/ROADMAP.md](docs/ROADMAP.md)**.
+
 1. **Helm chart** (current): install and document UI-only stack; align names/labels with HCO for easier migration.
 2. **API + controller**: reconcile the same resources from a custom resource (image overrides, replicas, TLS, network policy, console registration).
 3. **OLM packaging**: ClusterServiceVersion for install via Operator Lifecycle Manager where appropriate.
@@ -83,7 +90,7 @@ Full chart documentation: [`helm/kubevirt-console-ui/README.md`](helm/kubevirt-c
 
 ## Contributing
 
-Issues and pull requests are welcome. For chart-only changes, test with `helm template` and an OpenShift cluster smoke install. Operator work should follow the standard kubebuilder/operator-sdk patterns once the scaffold lands.
+See [CONTRIBUTING.md](CONTRIBUTING.md) and the operator delivery plan in [docs/ROADMAP.md](docs/ROADMAP.md). Reviewers are listed in [OWNERS](OWNERS) (same roster as kubevirt-plugin).
 
 ## License
 

@@ -32,10 +32,12 @@ A Route for apiserver-proxy is **on by default** (`route.enabled`); disable it i
 
 ## Prerequisites
 
-- OpenShift cluster with the Console operator and `ConsolePlugin` CRD
+- **OpenShift Console:** Console Operator available; `ConsolePlugin` CRD (`console.openshift.io`); console UI pods in `openshift-console` (required for default NetworkPolicy ingress). If `console.registerPlugin` is enabled, permissions to update `consoles.operator.openshift.io/cluster` `spec.plugins`.
 - Namespace (default `openshift-cnv`) — typically already present for virtualization
 - **KubeVirt control plane** reachable via the Kubernetes API (this chart does not install it)
 - Avoid duplicate installs: if CNV/HCO already manages the UI in `openshift-cnv`, use OLM upgrades instead of this chart
+
+Full list: [docs/ROADMAP.md#prerequisites-cluster-and-console](../../docs/ROADMAP.md#prerequisites-cluster-and-console).
 
 ## Install
 
