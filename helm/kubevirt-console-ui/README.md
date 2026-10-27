@@ -11,8 +11,24 @@ Deploys the **OpenShift Virtualization console UI stack** without the HCO/CNV ba
 | ConfigMap | `nginx-conf`, `kubevirt-user-settings`, `kubevirt-ui-features` |
 | ConsolePlugin | `kubevirt-plugin` |
 | Role / RoleBinding | `kubevirt-ui-config-reader` (authenticated users → UI configmaps) |
+| NetworkPolicy | `kubevirt-console-plugin-np`, `kubevirt-apiserver-proxy-np` (when `networkPolicy.enabled`, **on by default**) |
 
-Optional: NetworkPolicies (when `networkPolicy.enabled`), Route for external proxy access (`route.enabled`), post-install Console operator plugin registration (`console.registerPlugin`).
+A Route for apiserver-proxy is **on by default** (`route.enabled`); disable it if you only use in-cluster ConsolePlugin proxy. Post-install console registration: `console.registerPlugin`.
+
+### TLS and NetworkPolicy
+
+**TLS does not depend on NetworkPolicy.** Encryption and serving certificates are configured separately:
+
+- **Plugin and proxy Services** use the OpenShift annotation `service.beta.openshift.io/serving-cert-secret-name`. The serving-cert controller writes TLS material into Secrets; pods mount them (nginx on the plugin uses `/var/serving-cert`).
+- **Optional `proxy.tlsArgs`** pass TLS protocol/cipher flags to the proxy container (HCO aligns these with the cluster TLS profile).
+- **Route** (`route.enabled`) adds edge TLS when exposing apiserver-proxy outside the cluster.
+
+**NetworkPolicy** is L3/L4 segmentation only: who may connect to the plugin/proxy pods and where the proxy may egress (DNS, Kubernetes API). It does not issue or terminate TLS. Defaults match HCO when network policies are deployed (`networkPolicy.enabled: true`). Set `networkPolicy.enabled: false` on clusters where these rules block legitimate console or API traffic (for example non-standard console labels/namespaces).
+
+| Policy | Effect (summary) |
+|--------|------------------|
+| `kubevirt-console-plugin-np` | Ingress to the plugin only from OpenShift Console UI pods in `openshift-console` on the plugin port |
+| `kubevirt-apiserver-proxy-np` | Ingress on the proxy port; egress to DNS and apiserver (443/6443) |
 
 ## Prerequisites
 
@@ -38,10 +54,11 @@ Pin images to the same versions shipped with your CNV release (see HCO `deploy/i
 |-------|---------|
 | `plugin.image` / `proxy.image` | Container images (required) |
 | `plugin.replicas` / `proxy.replicas` | HA replica count (HCO uses 2 on highly available infra) |
-| `networkPolicy.enabled` | Deploy console + proxy network policies (HCO when `DEPLOY_NETWORK_POLICIES`) |
+| `networkPolicy.enabled` | Network segmentation for plugin/proxy (**default `true`**); not required for TLS—set `false` if rules block your console traffic |
 | `route.enabled` + `route.host` | Public Route for apiserver-proxy (local/off-cluster console) |
 | `console.registerPlugin` | Helm hook patches `consoles.operator.openshift.io/cluster` |
 | `hcoLabels.enabled` | Label resources like HCO (`app: kubevirt-hyperconverged`, and so on) |
+| `priorityClass.create` | Install `kubevirt-cluster-critical` (required for UI-only clusters; set `false` if KubeVirt already created it) |
 
 ## Uninstall
 
