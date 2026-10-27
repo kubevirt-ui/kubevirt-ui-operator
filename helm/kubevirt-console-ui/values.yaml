@@ -64,7 +64,7 @@ console:
   registerPlugin: true
 
 networkPolicy:
-  enabled: false
+  enabled: true
 
 route:
   # Public Route for kubevirt-apiserver-proxy (same host pattern as CNV/HCO:
