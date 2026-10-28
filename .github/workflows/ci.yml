@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  helm:
+    name: helm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.16.4
+      - name: Lint chart
+        run: helm lint ./helm/kubevirt-console-ui
+      - name: Template chart
+        run: |
+          helm template kubevirt-ui ./helm/kubevirt-console-ui \
+            --namespace openshift-cnv \
+            --set plugin.image=quay.io/kubevirt-ui/kubevirt-plugin:test \
+            --set proxy.image=quay.io/kubevirt-ui/kubevirt-apiserver-proxy:test \
+            > /tmp/rendered.yaml
+          test -s /tmp/rendered.yaml
+
+  go:
+    name: go
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Test
+        run: go test ./...
+      - name: Validate CRD manifest
+        run: kubectl apply --dry-run=client -f config/crd/bases/
