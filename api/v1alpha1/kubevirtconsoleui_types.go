@@ -55,7 +55,7 @@ type PriorityClassSpec struct {
 	// +kubebuilder:default=kubevirt-cluster-critical
 	Name string `json:"name,omitempty"`
 	// +kubebuilder:default=1000000000
-	Value int32 `json:"value,omitempty"`
+	Value *int32 `json:"value,omitempty"`
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:default=PreemptLowerPriority
 	PreemptionPolicy string `json:"preemptionPolicy,omitempty"`
@@ -64,11 +64,12 @@ type PriorityClassSpec struct {
 type PluginSpec struct {
 	// +kubebuilder:default=kubevirt-console-plugin
 	Name string `json:"name,omitempty"`
+	// +kubebuilder:default=quay.io/kubevirt-ui/kubevirt-plugin:latest
 	Image string `json:"image,omitempty"`
 	// +kubebuilder:default=9443
 	Port int32 `json:"port,omitempty"`
 	// +kubebuilder:default=1
-	Replicas int32 `json:"replicas,omitempty"`
+	Replicas *int32 `json:"replicas,omitempty"`
 	// +kubebuilder:default=kubevirt-console-plugin-service
 	ServiceName string `json:"serviceName,omitempty"`
 	// +kubebuilder:default=plugin-serving-cert
@@ -79,11 +80,12 @@ type PluginSpec struct {
 type ProxySpec struct {
 	// +kubebuilder:default=kubevirt-apiserver-proxy
 	Name string `json:"name,omitempty"`
+	// +kubebuilder:default=quay.io/kubevirt-ui/kubevirt-apiserver-proxy:latest
 	Image string `json:"image,omitempty"`
 	// +kubebuilder:default=8080
 	Port int32 `json:"port,omitempty"`
 	// +kubebuilder:default=1
-	Replicas int32 `json:"replicas,omitempty"`
+	Replicas *int32 `json:"replicas,omitempty"`
 	// +kubebuilder:default=kubevirt-apiserver-proxy-service
 	ServiceName string `json:"serviceName,omitempty"`
 	// +kubebuilder:default=console-proxy-serving-cert

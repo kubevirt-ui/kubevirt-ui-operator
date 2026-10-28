@@ -201,6 +201,11 @@ func (in *NetworkPolicySpec) DeepCopy() *NetworkPolicySpec {
 
 func (in *PluginSpec) DeepCopyInto(out *PluginSpec) {
 	*out = *in
+	if in.Replicas != nil {
+		in, out := &in.Replicas, &out.Replicas
+		*out = new(int32)
+		**out = **in
+	}
 }
 
 func (in *PluginSpec) DeepCopy() *PluginSpec {
@@ -219,6 +224,11 @@ func (in *PriorityClassSpec) DeepCopyInto(out *PriorityClassSpec) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.Value != nil {
+		in, out := &in.Value, &out.Value
+		*out = new(int32)
+		**out = **in
+	}
 }
 
 func (in *PriorityClassSpec) DeepCopy() *PriorityClassSpec {
@@ -232,6 +242,11 @@ func (in *PriorityClassSpec) DeepCopy() *PriorityClassSpec {
 
 func (in *ProxySpec) DeepCopyInto(out *ProxySpec) {
 	*out = *in
+	if in.Replicas != nil {
+		in, out := &in.Replicas, &out.Replicas
+		*out = new(int32)
+		**out = **in
+	}
 	if in.TLSArgs != nil {
 		in, out := &in.TLSArgs, &out.TLSArgs
 		*out = make([]string, len(*in))

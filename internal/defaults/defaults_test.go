@@ -38,3 +38,38 @@ func TestApply_explicitFalse(t *testing.T) {
 		t.Fatal("expected networkPolicy.enabled to stay false")
 	}
 }
+
+func TestApply_defaultImages(t *testing.T) {
+	spec := &consoleuiv1alpha1.KubeVirtConsoleUISpec{}
+	Apply(spec)
+	if spec.Plugin.Image != defaultPluginImage {
+		t.Fatalf("plugin image: got %q want %q", spec.Plugin.Image, defaultPluginImage)
+	}
+	if spec.Proxy.Image != defaultProxyImage {
+		t.Fatalf("proxy image: got %q want %q", spec.Proxy.Image, defaultProxyImage)
+	}
+}
+
+func TestApply_explicitZeroReplicas(t *testing.T) {
+	spec := &consoleuiv1alpha1.KubeVirtConsoleUISpec{
+		Plugin: consoleuiv1alpha1.PluginSpec{
+			Replicas: consoleuiv1alpha1.Int32Ptr(0),
+		},
+		Proxy: consoleuiv1alpha1.ProxySpec{
+			Replicas: consoleuiv1alpha1.Int32Ptr(0),
+		},
+		PriorityClass: consoleuiv1alpha1.PriorityClassSpec{
+			Value: consoleuiv1alpha1.Int32Ptr(0),
+		},
+	}
+	Apply(spec)
+	if consoleuiv1alpha1.Int32OrDefault(spec.Plugin.Replicas, 1) != 0 {
+		t.Fatal("expected plugin replicas to stay 0")
+	}
+	if consoleuiv1alpha1.Int32OrDefault(spec.Proxy.Replicas, 1) != 0 {
+		t.Fatal("expected proxy replicas to stay 0")
+	}
+	if consoleuiv1alpha1.Int32OrDefault(spec.PriorityClass.Value, 1000000000) != 0 {
+		t.Fatal("expected priorityClass value to stay 0")
+	}
+}

@@ -35,6 +35,7 @@ func merge(base map[string]string, extra map[string]string) map[string]string {
 	return out
 }
 
+// PluginSelector returns Deployment/Service selector labels for the console plugin.
 func PluginSelector(cr *consoleuiv1alpha1.KubeVirtConsoleUI) map[string]string {
 	out := map[string]string{
 		"app.kubernetes.io/component": "kubevirt-console-plugin",
@@ -45,6 +46,7 @@ func PluginSelector(cr *consoleuiv1alpha1.KubeVirtConsoleUI) map[string]string {
 	return out
 }
 
+// ProxySelector returns Deployment/Service selector labels for the apiserver proxy.
 func ProxySelector(cr *consoleuiv1alpha1.KubeVirtConsoleUI) map[string]string {
 	out := map[string]string{
 		"app.kubernetes.io/component": "kubevirt-apiserver-proxy",
@@ -55,14 +57,17 @@ func ProxySelector(cr *consoleuiv1alpha1.KubeVirtConsoleUI) map[string]string {
 	return out
 }
 
+// Plugin returns metadata labels for plugin operands.
 func Plugin(cr *consoleuiv1alpha1.KubeVirtConsoleUI) map[string]string {
 	return merge(Base(cr), map[string]string{"app.kubernetes.io/component": "kubevirt-console-plugin"})
 }
 
+// Proxy returns metadata labels for proxy operands.
 func Proxy(cr *consoleuiv1alpha1.KubeVirtConsoleUI) map[string]string {
 	return merge(Base(cr), map[string]string{"app.kubernetes.io/component": "kubevirt-apiserver-proxy"})
 }
 
+// UIConfig returns metadata labels for UI ConfigMaps.
 func UIConfig(cr *consoleuiv1alpha1.KubeVirtConsoleUI) map[string]string {
 	return merge(Base(cr), map[string]string{"app.kubernetes.io/component": "kubevirt-ui-config"})
 }

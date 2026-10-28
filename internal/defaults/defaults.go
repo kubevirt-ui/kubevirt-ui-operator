@@ -2,7 +2,13 @@ package defaults
 
 import consoleuiv1alpha1 "github.com/kubevirt-ui/kubevirt-ui-operator/api/v1alpha1"
 
-// Apply fills zero values to match helm/kubevirt-console-ui/values.yaml.
+const (
+	defaultPluginImage = "quay.io/kubevirt-ui/kubevirt-plugin:latest"
+	defaultProxyImage  = "quay.io/kubevirt-ui/kubevirt-apiserver-proxy:latest"
+)
+
+// Apply fills unset fields to match helm/kubevirt-console-ui/values.yaml.
+// Pointer fields distinguish omitted values from explicit zero/false.
 func Apply(spec *consoleuiv1alpha1.KubeVirtConsoleUISpec) {
 	defaultTrueBools(spec)
 
@@ -21,8 +27,8 @@ func Apply(spec *consoleuiv1alpha1.KubeVirtConsoleUISpec) {
 	if spec.PriorityClass.Name == "" {
 		spec.PriorityClass.Name = "kubevirt-cluster-critical"
 	}
-	if spec.PriorityClass.Value == 0 {
-		spec.PriorityClass.Value = 1000000000
+	if spec.PriorityClass.Value == nil {
+		spec.PriorityClass.Value = consoleuiv1alpha1.Int32Ptr(1000000000)
 	}
 	if spec.PriorityClass.Description == "" {
 		spec.PriorityClass.Description = "Priority class for critical KubeVirt and virtualization UI components"
@@ -33,11 +39,14 @@ func Apply(spec *consoleuiv1alpha1.KubeVirtConsoleUISpec) {
 	if spec.Plugin.Name == "" {
 		spec.Plugin.Name = "kubevirt-console-plugin"
 	}
+	if spec.Plugin.Image == "" {
+		spec.Plugin.Image = defaultPluginImage
+	}
 	if spec.Plugin.Port == 0 {
 		spec.Plugin.Port = 9443
 	}
-	if spec.Plugin.Replicas == 0 {
-		spec.Plugin.Replicas = 1
+	if spec.Plugin.Replicas == nil {
+		spec.Plugin.Replicas = consoleuiv1alpha1.Int32Ptr(1)
 	}
 	if spec.Plugin.ServiceName == "" {
 		spec.Plugin.ServiceName = "kubevirt-console-plugin-service"
@@ -51,11 +60,14 @@ func Apply(spec *consoleuiv1alpha1.KubeVirtConsoleUISpec) {
 	if spec.Proxy.Name == "" {
 		spec.Proxy.Name = "kubevirt-apiserver-proxy"
 	}
+	if spec.Proxy.Image == "" {
+		spec.Proxy.Image = defaultProxyImage
+	}
 	if spec.Proxy.Port == 0 {
 		spec.Proxy.Port = 8080
 	}
-	if spec.Proxy.Replicas == 0 {
-		spec.Proxy.Replicas = 1
+	if spec.Proxy.Replicas == nil {
+		spec.Proxy.Replicas = consoleuiv1alpha1.Int32Ptr(1)
 	}
 	if spec.Proxy.ServiceName == "" {
 		spec.Proxy.ServiceName = "kubevirt-apiserver-proxy-service"
@@ -115,6 +127,7 @@ func defaultTrueBools(spec *consoleuiv1alpha1.KubeVirtConsoleUISpec) {
 	}
 }
 
+// applyFeatureDefaults fills kubevirt-ui-features ConfigMap keys when empty.
 func applyFeatureDefaults(f *consoleuiv1alpha1.FeaturesSpec) {
 	if f.DisabledGuestSystemLogsAccess == "" {
 		f.DisabledGuestSystemLogsAccess = "false"
