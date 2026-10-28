@@ -44,3 +44,5 @@ jobs:
           cache: true
       - name: Test
         run: go test ./...
+      - name: Validate CRD manifest
+        run: kubectl apply --dry-run=client -f config/crd/bases/

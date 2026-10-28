@@ -1,3 +1,7 @@
+// Package v1alpha1 contains API Schema definitions for the console UI operator.
+//
+// +kubebuilder:object:generate=true
+// +groupName=consoleui.kubevirt.io
 package v1alpha1
 
 import (

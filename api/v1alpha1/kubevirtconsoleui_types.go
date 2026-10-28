@@ -64,7 +64,7 @@ type PriorityClassSpec struct {
 type PluginSpec struct {
 	// +kubebuilder:default=kubevirt-console-plugin
 	Name string `json:"name,omitempty"`
-	// +kubebuilder:default=quay.io/kubevirt-ui/kubevirt-plugin:latest
+	// +kubebuilder:default="quay.io/kubevirt-ui/kubevirt-plugin:latest"
 	Image string `json:"image,omitempty"`
 	// +kubebuilder:default=9443
 	Port int32 `json:"port,omitempty"`
@@ -81,7 +81,7 @@ type PluginSpec struct {
 type ProxySpec struct {
 	// +kubebuilder:default=kubevirt-apiserver-proxy
 	Name string `json:"name,omitempty"`
-	// +kubebuilder:default=quay.io/kubevirt-ui/kubevirt-apiserver-proxy:latest
+	// +kubebuilder:default="quay.io/kubevirt-ui/kubevirt-apiserver-proxy:latest"
 	Image string `json:"image,omitempty"`
 	// +kubebuilder:default=8080
 	Port int32 `json:"port,omitempty"`
@@ -118,14 +118,14 @@ type ConfigSpec struct {
 type FeaturesSpec struct {
 	AutomaticSubscriptionActivationKey  string `json:"automaticSubscriptionActivationKey,omitempty"`
 	AutomaticSubscriptionOrganizationId string `json:"automaticSubscriptionOrganizationId,omitempty"`
-	// +kubebuilder:default=false
+	// +kubebuilder:default="false"
 	DisabledGuestSystemLogsAccess string `json:"disabledGuestSystemLogsAccess,omitempty"`
-	// +kubebuilder:default=true
+	// +kubebuilder:default="true"
 	KubevirtApiserverProxy string `json:"kubevirtApiserverProxy,omitempty"`
-	// +kubebuilder:default=true
+	// +kubebuilder:default="true"
 	LoadBalancerEnabled string `json:"loadBalancerEnabled,omitempty"`
 	NodePortAddress     string `json:"nodePortAddress,omitempty"`
-	// +kubebuilder:default=false
+	// +kubebuilder:default="false"
 	NodePortEnabled string `json:"nodePortEnabled,omitempty"`
 	IPStackType                            string `json:"ipStackType,omitempty"`
 	HCOVersion                             string `json:"hcoVersion,omitempty"`
