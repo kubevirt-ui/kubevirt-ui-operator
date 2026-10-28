@@ -74,6 +74,7 @@ type PluginSpec struct {
 	ServiceName string `json:"serviceName,omitempty"`
 	// +kubebuilder:default=plugin-serving-cert
 	ServingCertSecret string `json:"servingCertSecret,omitempty"`
+	// +kubebuilder:default=kubevirt-cluster-critical
 	PriorityClassName string `json:"priorityClassName,omitempty"`
 }
 
@@ -90,6 +91,7 @@ type ProxySpec struct {
 	ServiceName string `json:"serviceName,omitempty"`
 	// +kubebuilder:default=console-proxy-serving-cert
 	ServingCertSecret string `json:"servingCertSecret,omitempty"`
+	// +kubebuilder:default=kubevirt-cluster-critical
 	PriorityClassName string `json:"priorityClassName,omitempty"`
 	TLSArgs []string `json:"tlsArgs,omitempty"`
 }
@@ -114,13 +116,17 @@ type ConfigSpec struct {
 }
 
 type FeaturesSpec struct {
-	AutomaticSubscriptionActivationKey     string `json:"automaticSubscriptionActivationKey,omitempty"`
-	AutomaticSubscriptionOrganizationId    string `json:"automaticSubscriptionOrganizationId,omitempty"`
-	DisabledGuestSystemLogsAccess          string `json:"disabledGuestSystemLogsAccess,omitempty"`
-	KubevirtApiserverProxy                 string `json:"kubevirtApiserverProxy,omitempty"`
-	LoadBalancerEnabled                    string `json:"loadBalancerEnabled,omitempty"`
-	NodePortAddress                        string `json:"nodePortAddress,omitempty"`
-	NodePortEnabled                        string `json:"nodePortEnabled,omitempty"`
+	AutomaticSubscriptionActivationKey  string `json:"automaticSubscriptionActivationKey,omitempty"`
+	AutomaticSubscriptionOrganizationId string `json:"automaticSubscriptionOrganizationId,omitempty"`
+	// +kubebuilder:default=false
+	DisabledGuestSystemLogsAccess string `json:"disabledGuestSystemLogsAccess,omitempty"`
+	// +kubebuilder:default=true
+	KubevirtApiserverProxy string `json:"kubevirtApiserverProxy,omitempty"`
+	// +kubebuilder:default=true
+	LoadBalancerEnabled string `json:"loadBalancerEnabled,omitempty"`
+	NodePortAddress     string `json:"nodePortAddress,omitempty"`
+	// +kubebuilder:default=false
+	NodePortEnabled string `json:"nodePortEnabled,omitempty"`
 	IPStackType                            string `json:"ipStackType,omitempty"`
 	HCOVersion                             string `json:"hcoVersion,omitempty"`
 }
