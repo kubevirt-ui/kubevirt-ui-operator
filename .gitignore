@@ -1,0 +1,23 @@
+# Binaries
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test / coverage
+*.out
+cover.out
+testbin/
+
+# Go
+vendor/
+
+# IDE
+.idea/
+*.swp
+.DS_Store
+
+# Kubebuilder / envtest
+.env
+.env.*

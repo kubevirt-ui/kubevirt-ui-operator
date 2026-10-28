@@ -13,7 +13,13 @@ Smoke install on OpenShift: see [helm/kubevirt-console-ui/README.md](../helm/kub
 
 ## Operator (coming)
 
-Follow [ROADMAP.md — Phase 1](ROADMAP.md#phase-1--scaffold--minimal-reconcile-24-weeks). Local workflow will mirror [kube-gateway-operator](https://github.com/kubevirt-ui/kube-gateway-operator) (`make install`, `make run`).
+Follow [ROADMAP.md — Phase 1](ROADMAP.md#phase-1--scaffold--minimal-reconcile-24-weeks). API types live under `api/v1alpha1/`; Helm parity helpers under `internal/defaults` and `internal/labels`.
+
+```bash
+go test ./...
+```
+
+Local controller workflow will mirror [kube-gateway-operator](https://github.com/kubevirt-ui/kube-gateway-operator) (`make install`, `make run`) once the manager scaffold lands.
 
 ## Cluster prerequisites
 

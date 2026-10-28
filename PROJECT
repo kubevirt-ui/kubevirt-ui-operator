@@ -1,0 +1,16 @@
+domain: kubevirt.io
+layout:
+- go.kubebuilder.io/v4
+projectName: kubevirt-ui-operator
+repo: github.com/kubevirt-ui/kubevirt-ui-operator
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: kubevirt.io
+  group: consoleui
+  kind: KubeVirtConsoleUI
+  path: github.com/kubevirt-ui/kubevirt-ui-operator/api/v1alpha1
+  version: v1alpha1
+version: "3"
