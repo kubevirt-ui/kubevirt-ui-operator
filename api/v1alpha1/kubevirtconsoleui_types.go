@@ -74,7 +74,6 @@ type PluginSpec struct {
 	ServiceName string `json:"serviceName,omitempty"`
 	// +kubebuilder:default=plugin-serving-cert
 	ServingCertSecret string `json:"servingCertSecret,omitempty"`
-	// +kubebuilder:default=kubevirt-cluster-critical
 	PriorityClassName string `json:"priorityClassName,omitempty"`
 }
 
@@ -91,7 +90,6 @@ type ProxySpec struct {
 	ServiceName string `json:"serviceName,omitempty"`
 	// +kubebuilder:default=console-proxy-serving-cert
 	ServingCertSecret string `json:"servingCertSecret,omitempty"`
-	// +kubebuilder:default=kubevirt-cluster-critical
 	PriorityClassName string `json:"priorityClassName,omitempty"`
 	TLSArgs []string `json:"tlsArgs,omitempty"`
 }

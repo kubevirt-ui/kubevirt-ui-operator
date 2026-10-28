@@ -147,7 +147,6 @@ spec:
                     format: int32
                     type: integer
                   priorityClassName:
-                    default: kubevirt-cluster-critical
                     type: string
                   replicas:
                     default: 1
@@ -191,7 +190,6 @@ spec:
                     format: int32
                     type: integer
                   priorityClassName:
-                    default: kubevirt-cluster-critical
                     type: string
                   replicas:
                     default: 1
