@@ -22,8 +22,8 @@ Console integration requires `consoles.operator.openshift.io` and `consoleplugin
 
 | Workload | Image reference |
 |----------|-----------------|
-| Console plugin | Helm `plugin.image` / operator env `KUBEVIRT_CONSOLE_PLUGIN_IMAGE` — default `quay.io/kubevirt-ui/kubevirt-plugin` |
-| Apiserver proxy | Helm `proxy.image` / operator env `KUBEVIRT_APISERVER_PROXY_IMAGE` — default `quay.io/kubevirt-ui/kubevirt-apiserver-proxy` |
+| Console plugin | Helm `plugin.image` / operator env `KUBEVIRT_CONSOLE_PLUGIN_IMAGE` — default `quay.io/kubevirtui/kubevirt-plugin` |
+| Apiserver proxy | Helm `proxy.image` / operator env `KUBEVIRT_APISERVER_PROXY_IMAGE` — default `quay.io/kubevirtui/kubevirt-apiserver-proxy` |
 
 Example tags from HCO (change over time; verify in HCO for your release):
 

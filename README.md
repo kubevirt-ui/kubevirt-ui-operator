@@ -63,8 +63,8 @@ Full prerequisite list: [docs/ROADMAP.md#prerequisites-cluster-and-console](docs
 ```bash
 helm upgrade --install kubevirt-ui ./helm/kubevirt-console-ui \
   --namespace kubevirt-ui \
-  --set plugin.image=quay.io/kubevirt-ui/kubevirt-plugin:<tag> \
-  --set proxy.image=quay.io/kubevirt-ui/kubevirt-apiserver-proxy:<tag>
+  --set plugin.image=quay.io/kubevirtui/kubevirt-plugin:<tag> \
+  --set proxy.image=quay.io/kubevirtui/kubevirt-apiserver-proxy:<tag>
 ```
 
 The chart sets **`createNamespace: true`** by default (labeled `Namespace` resource; do not also pass **`--create-namespace`**). Leave **`config.features.hcoVersion`** empty unless you set it manually; the operator discovers HCO version from **`HCO_NAMESPACE`** when HyperConverged is installed.
