@@ -16,8 +16,8 @@ const (
 	// DefaultHCONamespace is where the HyperConverged CR is installed on OCP/CNV clusters.
 	DefaultHCONamespace = "openshift-cnv"
 
-	DefaultPluginImage = "quay.io/kubevirt-ui/kubevirt-plugin:latest"
-	DefaultProxyImage  = "quay.io/kubevirt-ui/kubevirt-apiserver-proxy:latest"
+	DefaultPluginImage = "quay.io/kubevirtui/kubevirt-plugin:latest"
+	DefaultProxyImage  = "quay.io/kubevirtui/kubevirt-apiserver-proxy:latest"
 )
 
 // Config holds operator runtime settings (env), not CR spec.

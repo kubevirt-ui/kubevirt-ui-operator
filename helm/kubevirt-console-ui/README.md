@@ -41,13 +41,13 @@ Full list: [docs/ROADMAP.md#prerequisites-cluster-and-console](../../docs/ROADMA
 
 ## Install
 
-Default (operand namespace **`kubevirt-ui`**, operator-parity labels; images on `quay.io/kubevirt-ui`):
+Default (operand namespace **`kubevirt-ui`**, operator-parity labels; images on `quay.io/kubevirtui`):
 
 ```bash
 helm upgrade --install kubevirt-ui ./helm/kubevirt-console-ui \
   --namespace kubevirt-ui \
-  --set plugin.image=quay.io/kubevirt-ui/kubevirt-plugin:<tag> \
-  --set proxy.image=quay.io/kubevirt-ui/kubevirt-apiserver-proxy:<tag>
+  --set plugin.image=quay.io/kubevirtui/kubevirt-plugin:<tag> \
+  --set proxy.image=quay.io/kubevirtui/kubevirt-apiserver-proxy:<tag>
 ```
 
 For the **operator** path instead of Helm, install the cluster-scoped **`KubeVirtConsoleUI`** named **`cluster`** after deploying the manager—see the root [README](../../README.md#quick-start-operator).
@@ -60,7 +60,7 @@ Pin images to the same versions shipped with your CNV release (see HCO `deploy/i
 |-------|---------|
 | `namespace` | Operand namespace for Deployments, Services, ConfigMaps (**default `kubevirt-ui`**) |
 | `createNamespace` | Render a labeled **`Namespace`** for operands (**default `true`**) |
-| `plugin.image` / `proxy.image` | Container images (`quay.io/kubevirt-ui/...`; pin tags in production) |
+| `plugin.image` / `proxy.image` | Container images (`quay.io/kubevirtui/...`; pin tags in production) |
 | `plugin.replicas` / `proxy.replicas` | HA replica count (HCO uses 2 on highly available infra) |
 | `networkPolicy.enabled` | Network segmentation for plugin/proxy (**default `true`**); not required for TLS—set `false` if rules block your console traffic |
 | `route.enabled` + `route.host` | Public Route for apiserver-proxy (local/off-cluster console) |
