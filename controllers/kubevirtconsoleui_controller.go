@@ -111,14 +111,14 @@ func (r *KubeVirtConsoleUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				return o.GetName() == "cluster"
 			})),
 		).
-		Watches(
+		Watches( // we already watch CMs, above
 			&corev1.ConfigMap{},
 			handler.EnqueueRequestsFromMapFunc(r.mapFeaturesConfigMapToRequests),
 			builder.WithPredicates(predicate.NewPredicateFuncs(func(o client.Object) bool {
 				return o.GetNamespace() == operandNS && o.GetName() == names.FeaturesConfigMap
 			})),
 		).
-		Watches(
+		Watches( // I think this is redundant. See a comment about it in internal/platform/console.go
 			&apiextensionsv1.CustomResourceDefinition{},
 			handler.EnqueueRequestsFromMapFunc(r.mapHyperConvergedCRDToRequests),
 			builder.WithPredicates(predicate.NewPredicateFuncs(func(o client.Object) bool {
