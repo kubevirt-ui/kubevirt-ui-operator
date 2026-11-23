@@ -1,8 +1,9 @@
 package status
 
 import (
-	consoleuiv1alpha1 "github.com/kubevirt-ui/kubevirt-ui-operator/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	consoleuiv1alpha1 "github.com/kubevirt-ui/kubevirt-ui-operator/api/v1alpha1"
 )
 
 // SetCondition upserts a condition by type.
@@ -25,7 +26,8 @@ func SetCondition(conditions *[]metav1.Condition, conditionType string, status m
 		Status:             status,
 		Reason:             reason,
 		Message:            message,
-		LastTransitionTime: now,
+		LastTransitionTime: now, // <= this is tricky. you don't want to do it for every reconcile loop. it will cause endless loop. Change it only if something was changed
+		// The actual fix could be using the k8s.io/apimachinery/pkg/api/meta.SetStatusCondition function, instead of this function.
 	})
 }
 

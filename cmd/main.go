@@ -47,6 +47,7 @@ func main() {
 	var metricsAddr string
 	var probeAddr string
 	var enableLeaderElection bool
+	// I think the default should be something like 8443, as a standard https port. We should not use clear http.
 	flag.StringVar(&metricsAddr, "metrics-bind-address", "0", "The address the metric endpoint binds to. Use :8080 to expose metrics.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false, "Enable leader election for controller manager.")
@@ -60,6 +61,10 @@ func main() {
 
 	opCfg := operconfig.LoadFromEnv()
 
+	// this can be simplified: move this logic down, below the manager setup, then use the client from the manager,
+	// instead of initiate a new one. Notice that in this phase we can't use mgr.GetClient() yet, because it is not
+	// ready. Instead, use the read only client: mgr.GetAPIReader(); e.g.
+	//   hcoInstalled, err := hcoversion.Installed(context.Background(), mgr.GetAPIReader())
 	restConfig := ctrl.GetConfigOrDie()
 	startupClient, err := client.New(restConfig, client.Options{Scheme: scheme})
 	if err != nil {
@@ -96,9 +101,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	// consider to check if running on OpensShift and exit if not.
+
 	if err = (&controllers.KubeVirtConsoleUIReconciler{
 		Client:    mgr.GetClient(),
-		APIReader: mgr.GetAPIReader(),
+		APIReader: mgr.GetAPIReader(), // you don't need both client and APIReader. Just use the client.
 		Scheme:    mgr.GetScheme(),
 		Config:    opCfg,
 	}).SetupWithManager(mgr); err != nil {

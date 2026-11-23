@@ -17,6 +17,9 @@ const ConsolePluginCRDName = "consoleplugins.console.openshift.io"
 
 // ConsoleRequirements reports whether the cluster exposes OpenShift/OKD console APIs.
 func ConsoleRequirements(ctx context.Context, c client.Client) (met bool, reason, message string) {
+	// I wouldn't check that the console CRD is existed in each and every reconcile loop. I wouldn't check it at all, but
+	// if it's really important, we can check it once at boot time. but I think we can assume it's there if running on
+	// OpenShift (again - can be checked one on boot)
 	crd := &apiextensionsv1.CustomResourceDefinition{}
 	if err := c.Get(ctx, types.NamespacedName{Name: ConsolePluginCRDName}, crd); err != nil {
 		if errors.IsNotFound(err) {
