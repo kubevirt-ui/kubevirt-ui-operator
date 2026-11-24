@@ -7,7 +7,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -32,8 +31,8 @@ import (
 // KubeVirtConsoleUIReconciler reconciles the console UI stack for a KubeVirtConsoleUI CR.
 type KubeVirtConsoleUIReconciler struct {
 	client.Client
-	Scheme    *runtime.Scheme
-	Config    operconfig.Config
+	Scheme *runtime.Scheme
+	Config operconfig.Config
 }
 
 // +kubebuilder:rbac:groups=consoleui.kubevirt.io,resources=kubevirtconsoleuis,verbs=get;list;watch;create;update;patch;delete
@@ -48,7 +47,7 @@ type KubeVirtConsoleUIReconciler struct {
 // +kubebuilder:rbac:groups=route.openshift.io,resources=routes,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=operator.openshift.io,resources=consoles,verbs=get;list;watch;update;patch
 // +kubebuilder:rbac:groups=hco.kubevirt.io,resources=hyperconvergeds,verbs=get;list;watch
-// +kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,verbs=get;list;watch
+// +kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,verbs=get
 
 func (r *KubeVirtConsoleUIReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	if req.Name != names.ResourceName {
@@ -108,13 +107,6 @@ func (r *KubeVirtConsoleUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			handler.EnqueueRequestsFromMapFunc(r.mapConsoleToRequests),
 			builder.WithPredicates(predicate.NewPredicateFuncs(func(o client.Object) bool {
 				return o.GetName() == "cluster"
-			})),
-		).
-		Watches(
-			&apiextensionsv1.CustomResourceDefinition{},
-			handler.EnqueueRequestsFromMapFunc(r.mapHyperConvergedCRDToRequests),
-			builder.WithPredicates(predicate.NewPredicateFuncs(func(o client.Object) bool {
-				return o.GetName() == hcoversion.CRDName
 			})),
 		)
 

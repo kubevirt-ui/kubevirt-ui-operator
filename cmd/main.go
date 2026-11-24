@@ -26,6 +26,7 @@ import (
 	"github.com/kubevirt-ui/kubevirt-ui-operator/controllers"
 	"github.com/kubevirt-ui/kubevirt-ui-operator/internal/hcoversion"
 	"github.com/kubevirt-ui/kubevirt-ui-operator/internal/operconfig"
+	"github.com/kubevirt-ui/kubevirt-ui-operator/internal/platform"
 )
 
 var (
@@ -61,12 +62,16 @@ func main() {
 	opCfg := operconfig.LoadFromEnv()
 
 	restConfig := ctrl.GetConfigOrDie()
-	// HyperConverged detection must run before ctrl.NewManager: operconfig.CacheOptions
+	// Platform and HyperConverged detection must run before ctrl.NewManager: operconfig.CacheOptions
 	// adds the HyperConverged informer conditionally, and controller-runtime resolves ByObject REST
 	// mappings eagerly at manager construction, which fails if the CRD is not installed.
 	startupClient, err := client.New(restConfig, client.Options{Scheme: scheme})
 	if err != nil {
 		setupLog.Error(err, "unable to create startup client")
+		os.Exit(1)
+	}
+	if ok, err := platform.IsOpenShift(context.Background(), startupClient); err != nil || !ok {
+		setupLog.Error(err, "OpenShift console APIs not found; this operator requires OpenShift")
 		os.Exit(1)
 	}
 	hcoInstalled, err := hcoversion.Installed(context.Background(), startupClient)

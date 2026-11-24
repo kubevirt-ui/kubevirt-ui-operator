@@ -5,10 +5,9 @@ import (
 )
 
 const (
-	ConditionTypeReady                   = "Ready"
-	ConditionTypeProgressing             = "Progressing"
-	ConditionTypeDegraded                = "Degraded"
-	ConditionTypePlatformRequirementsMet = "PlatformRequirementsMet"
+	ConditionTypeReady       = "Ready"
+	ConditionTypeProgressing = "Progressing"
+	ConditionTypeDegraded    = "Degraded"
 )
 
 // KubeVirtConsoleUISpec defines optional day-2 settings for the console UI stack.

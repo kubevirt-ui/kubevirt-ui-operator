@@ -112,7 +112,7 @@ Use the same `VERSION`, `IMG`, and `BUNDLE_IMG` on every target. A second `make`
 
 See [Operator SDK bundle tutorial](https://sdk.operatorframework.io/docs/olm-integration/tutorial-bundle/).
 
-The reconciler sets `PlatformRequirementsMet` when OpenShift console APIs are available, then reconciles UI operands. With `spec.console.registerPlugin: true`, the manager patches `consoles.operator.openshift.io/cluster` (requires ClusterRole rules on the operator SA).
+At startup the operator checks that the OpenShift console APIs (the `consoleplugins.console.openshift.io` CRD) exist and exits if they do not; the reconciler then reconciles UI operands. With `spec.console.registerPlugin: true`, the manager patches `consoles.operator.openshift.io/cluster` (requires ClusterRole rules on the operator SA).
 
 ### CI: operator image
 
