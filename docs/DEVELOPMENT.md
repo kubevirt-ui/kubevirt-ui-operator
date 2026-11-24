@@ -18,7 +18,7 @@ This project uses the [Operator SDK](https://sdk.operatorframework.io/) Go layou
 - **Entrypoint:** `cmd/main.go`
 - **API:** `api/v1alpha1/`
 - **Controller:** `controllers/`
-- **Operands:** `internal/manifests/` (Helm parity via `internal/defaults`, `internal/labels`)
+- **Operands:** `internal/manifests/` (Helm parity via `internal/labels`)
 - **Deploy / OLM:** `config/` (kustomize, CSV under `config/manifests/`)
 
 Install the CLI (match `OPERATOR_SDK_VERSION` in the Makefile, currently v1.39.1):

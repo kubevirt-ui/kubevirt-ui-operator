@@ -32,7 +32,6 @@ import (
 // KubeVirtConsoleUIReconciler reconciles the console UI stack for a KubeVirtConsoleUI CR.
 type KubeVirtConsoleUIReconciler struct {
 	client.Client
-	APIReader client.Reader
 	Scheme    *runtime.Scheme
 	Config    operconfig.Config
 }
@@ -109,13 +108,6 @@ func (r *KubeVirtConsoleUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			handler.EnqueueRequestsFromMapFunc(r.mapConsoleToRequests),
 			builder.WithPredicates(predicate.NewPredicateFuncs(func(o client.Object) bool {
 				return o.GetName() == "cluster"
-			})),
-		).
-		Watches(
-			&corev1.ConfigMap{},
-			handler.EnqueueRequestsFromMapFunc(r.mapFeaturesConfigMapToRequests),
-			builder.WithPredicates(predicate.NewPredicateFuncs(func(o client.Object) bool {
-				return o.GetNamespace() == operandNS && o.GetName() == names.FeaturesConfigMap
 			})),
 		).
 		Watches(

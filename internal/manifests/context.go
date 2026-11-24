@@ -9,7 +9,7 @@ import (
 // Context is the manifest reconciliation context.
 type Context = builders.Context
 
-// NewContext deep-copies the CR and applies default spec values for manifest generation.
+// NewContext deep-copies the CR and pairs it with operator config for manifest generation.
 func NewContext(cr *consoleuiv1alpha1.KubeVirtConsoleUI, cfg operconfig.Config) *Context {
 	return builders.NewContext(cr, cfg)
 }

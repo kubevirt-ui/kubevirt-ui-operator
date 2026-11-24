@@ -22,7 +22,7 @@ func ProxyServiceAccount(m *Context) *corev1.ServiceAccount {
 
 func ProxyDeployment(m *Context) *appsv1.Deployment {
 	replicas := int32(1)
-	tlsArgs := m.Spec.Proxy.TLSArgs
+	tlsArgs := m.CR.Spec.Proxy.TLSArgs
 	container := corev1.Container{
 		Name:            names.ProxyDeployment,
 		Image:           m.ProxyImage,

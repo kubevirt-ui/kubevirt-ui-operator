@@ -2,30 +2,17 @@ package status
 
 import (
 	consoleuiv1alpha1 "github.com/kubevirt-ui/kubevirt-ui-operator/api/v1alpha1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// SetCondition upserts a condition by type.
+// SetCondition upserts a condition by type. LastTransitionTime changes only when Status changes.
 func SetCondition(conditions *[]metav1.Condition, conditionType string, status metav1.ConditionStatus, reason, message string) {
-	now := metav1.Now()
-	for i := range *conditions {
-		if (*conditions)[i].Type == conditionType {
-			if (*conditions)[i].Status == status && (*conditions)[i].Reason == reason && (*conditions)[i].Message == message {
-				return
-			}
-			(*conditions)[i].Status = status
-			(*conditions)[i].Reason = reason
-			(*conditions)[i].Message = message
-			(*conditions)[i].LastTransitionTime = now
-			return
-		}
-	}
-	*conditions = append(*conditions, metav1.Condition{
-		Type:               conditionType,
-		Status:             status,
-		Reason:             reason,
-		Message:            message,
-		LastTransitionTime: now,
+	meta.SetStatusCondition(conditions, metav1.Condition{
+		Type:    conditionType,
+		Status:  status,
+		Reason:  reason,
+		Message: message,
 	})
 }
 

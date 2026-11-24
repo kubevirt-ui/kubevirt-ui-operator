@@ -61,6 +61,9 @@ func main() {
 	opCfg := operconfig.LoadFromEnv()
 
 	restConfig := ctrl.GetConfigOrDie()
+	// HyperConverged detection must run before ctrl.NewManager: operconfig.CacheOptions
+	// adds the HyperConverged informer conditionally, and controller-runtime resolves ByObject REST
+	// mappings eagerly at manager construction, which fails if the CRD is not installed.
 	startupClient, err := client.New(restConfig, client.Options{Scheme: scheme})
 	if err != nil {
 		setupLog.Error(err, "unable to create startup client")
@@ -97,10 +100,9 @@ func main() {
 	}
 
 	if err = (&controllers.KubeVirtConsoleUIReconciler{
-		Client:    mgr.GetClient(),
-		APIReader: mgr.GetAPIReader(),
-		Scheme:    mgr.GetScheme(),
-		Config:    opCfg,
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+		Config: opCfg,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "KubeVirtConsoleUI")
 		os.Exit(1)
