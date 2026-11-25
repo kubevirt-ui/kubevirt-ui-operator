@@ -32,6 +32,9 @@ const (
 	ConfigReaderRole        = "kubevirt-ui-config-reader"
 	ConfigReaderRoleBinding = "kubevirt-ui-config-reader-rolebinding"
 
+	// NginxConfigHashAnnotation is set on the plugin pod template so nginx.conf changes roll the pods.
+	NginxConfigHashAnnotation = "consoleui.kubevirt.io/nginx-config-hash"
+
 	PriorityClassDescription = "Priority class for critical KubeVirt and virtualization UI components"
 )
 

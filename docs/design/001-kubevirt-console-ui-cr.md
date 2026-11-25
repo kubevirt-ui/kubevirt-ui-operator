@@ -33,7 +33,7 @@ Same as [ROADMAP — Prerequisites](../ROADMAP.md#prerequisites-cluster-and-cons
 | Field | Purpose |
 |-------|---------|
 | `plugin.image`, `plugin.replicas`, … | Console plugin deployment |
-| `proxy.image`, `proxy.replicas`, `proxy.tlsArgs` | Apiserver proxy |
+| `proxy.image`, `proxy.replicas` | Apiserver proxy |
 | `config.features` | `kubevirt-ui-features` data |
 | `networkPolicy.enabled` | Plugin/proxy NetworkPolicies |
 | `route.enabled`, `route.host` | Apiserver-proxy Route |
@@ -68,7 +68,7 @@ Same as [ROADMAP — Prerequisites](../ROADMAP.md#prerequisites-cluster-and-cons
 1. Single cluster-wide CR vs one CR per namespace? **v1alpha1:** one CR per operand namespace; CR must be installed in that namespace.
 2. Finalizer to remove console plugin entry on CR delete? **Not in v1alpha1** — `ConsolePlugin`, `PriorityClass`, and console `spec.plugins` are not garbage-collected on CR delete.
 3. Validation webhook for conflicting HCO-managed UI in same namespace?
-4. How to surface cluster TLS profile on proxy (`tlsArgs`) without coupling to HCO?
+4. ~~How to surface cluster TLS profile on proxy (`tlsArgs`) without coupling to HCO?~~ **Resolved:** the operator reads `apiservers.config.openshift.io/cluster` `tlsSecurityProfile` directly (no CR field, no HCO coupling) and applies it to the proxy args, the plugin nginx `ssl_protocols`/`ssl_ciphers`, and the operator metrics endpoint. Changes to the profile re-reconcile; nginx changes roll the plugin pods via the `consoleui.kubevirt.io/nginx-config-hash` annotation.
 
 ## Acceptance criteria (M1)
 

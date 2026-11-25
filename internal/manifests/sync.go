@@ -21,8 +21,7 @@ import (
 )
 
 // ReconcileStack applies Helm-parity operands for the effective spec in Context.
-// hcoReader should be a direct API reader (not cache-scoped) for HyperConverged discovery.
-func ReconcileStack(ctx context.Context, c client.Client, hcoReader client.Reader, scheme *runtime.Scheme, m *Context) error {
+func ReconcileStack(ctx context.Context, c client.Client, scheme *runtime.Scheme, m *Context) error {
 	if err := reconcileCluster(ctx, c, func() client.Object { return builders.PriorityClass(m) }); err != nil {
 		return err
 	}
@@ -41,7 +40,7 @@ func ReconcileStack(ctx context.Context, c client.Client, hcoReader client.Reade
 			return reconcileNamespaced(ctx, c, scheme, m, func() client.Object { return builders.UserSettingsConfigMap(m) })
 		},
 		func() error {
-			return reconcileFeaturesConfigMap(ctx, c, hcoReader, scheme, m)
+			return reconcileFeaturesConfigMap(ctx, c, scheme, m)
 		},
 		func() error {
 			return reconcileNamespaced(ctx, c, scheme, m, func() client.Object { return builders.PluginDeployment(m) })
@@ -83,21 +82,16 @@ func ReconcileStack(ctx context.Context, c client.Client, hcoReader client.Reade
 	return nil
 }
 
-func reconcileFeaturesConfigMap(ctx context.Context, c client.Client, hcoReader client.Reader, scheme *runtime.Scheme, m *Context) error {
-	hcoReader = coalesceReader(hcoReader, c)
+func reconcileFeaturesConfigMap(ctx context.Context, c client.Client, scheme *runtime.Scheme, m *Context) error {
 	hcoVersion := ""
 	manageHCOVersion := false
-	if m.HCONamespace != "" {
-		installed, err := hcoversion.Installed(ctx, hcoReader)
+	if m.HCOInstalled && m.HCONamespace != "" {
+		manageHCOVersion = true
+		v, err := hcoversion.OperatorVersion(ctx, c, m.HCONamespace)
 		if err != nil {
-			return err
-		}
-		if installed {
-			manageHCOVersion = true
-			hcoVersion, err = hcoversion.OperatorVersion(ctx, hcoReader, m.HCONamespace)
-			if err != nil {
-				manageHCOVersion = false
-			}
+			manageHCOVersion = false
+		} else {
+			hcoVersion = v
 		}
 	}
 	cm := &corev1.ConfigMap{}
@@ -109,13 +103,6 @@ func reconcileFeaturesConfigMap(ctx context.Context, c client.Client, hcoReader 
 		return controllerutil.SetControllerReference(m.CR, cm, scheme)
 	})
 	return err
-}
-
-func coalesceReader(preferred, fallback client.Reader) client.Reader {
-	if preferred != nil {
-		return preferred
-	}
-	return fallback
 }
 
 func reconcileNamespaced(ctx context.Context, c client.Client, scheme *runtime.Scheme, m *Context, build func() client.Object) error {

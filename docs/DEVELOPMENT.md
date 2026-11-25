@@ -18,7 +18,7 @@ This project uses the [Operator SDK](https://sdk.operatorframework.io/) Go layou
 - **Entrypoint:** `cmd/main.go`
 - **API:** `api/v1alpha1/`
 - **Controller:** `controllers/`
-- **Operands:** `internal/manifests/` (Helm parity via `internal/defaults`, `internal/labels`)
+- **Operands:** `internal/manifests/` (Helm parity via `internal/labels`)
 - **Deploy / OLM:** `config/` (kustomize, CSV under `config/manifests/`)
 
 Install the CLI (match `OPERATOR_SDK_VERSION` in the Makefile, currently v1.39.1):
@@ -85,6 +85,8 @@ kubectl apply -f config/samples/consoleui_v1alpha1_kubevirtconsoleui.yaml
 
 If `make deploy` fails building `controller-gen`, ensure Go 1.27+ and use the Makefile’s pinned `CONTROLLER_TOOLS_VERSION` (v0.22.0), or install `controller-gen` on your `PATH`.
 
+TLS for the proxy, plugin nginx, and the operator metrics endpoint is derived from `apiservers.config.openshift.io/cluster` `tlsSecurityProfile` (default Intermediate when unset). There is no CR field for it; to test, edit that object (for example `oc patch apiserver cluster --type=merge -p '{"spec":{"tlsSecurityProfile":{"type":"Modern"}}}'`) and watch the operand rollouts.
+
 Undeploy the operator manager (CRD and CRs remain):
 
 ```bash
@@ -112,7 +114,7 @@ Use the same `VERSION`, `IMG`, and `BUNDLE_IMG` on every target. A second `make`
 
 See [Operator SDK bundle tutorial](https://sdk.operatorframework.io/docs/olm-integration/tutorial-bundle/).
 
-The reconciler sets `PlatformRequirementsMet` when OpenShift console APIs are available, then reconciles UI operands. With `spec.console.registerPlugin: true`, the manager patches `consoles.operator.openshift.io/cluster` (requires ClusterRole rules on the operator SA).
+At startup the operator checks that the OpenShift console APIs (the `consoleplugins.console.openshift.io` CRD) exist and exits if they do not; the reconciler then reconciles UI operands. With `spec.console.registerPlugin: true`, the manager patches `consoles.operator.openshift.io/cluster` (requires ClusterRole rules on the operator SA).
 
 ### CI: operator image
 

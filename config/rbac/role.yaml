@@ -24,8 +24,6 @@ rules:
   - customresourcedefinitions
   verbs:
   - get
-  - list
-  - watch
 - apiGroups:
   - apps
   resources:
@@ -37,6 +35,14 @@ rules:
   - list
   - patch
   - update
+  - watch
+- apiGroups:
+  - config.openshift.io
+  resources:
+  - apiservers
+  verbs:
+  - get
+  - list
   - watch
 - apiGroups:
   - console.openshift.io

@@ -2,14 +2,11 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	consoleuiv1alpha1 "github.com/kubevirt-ui/kubevirt-ui-operator/api/v1alpha1"
 	"github.com/kubevirt-ui/kubevirt-ui-operator/internal/manifests"
-	"github.com/kubevirt-ui/kubevirt-ui-operator/internal/platform"
-	"github.com/kubevirt-ui/kubevirt-ui-operator/internal/status"
 )
 
 func (r *KubeVirtConsoleUIReconciler) reconcile(
@@ -17,19 +14,8 @@ func (r *KubeVirtConsoleUIReconciler) reconcile(
 	cr *consoleuiv1alpha1.KubeVirtConsoleUI,
 	mctx *manifests.Context,
 ) error {
-	met, reason, message := platform.ConsoleRequirements(ctx, r.Client)
-	status.SetCondition(&cr.Status.Conditions, consoleuiv1alpha1.ConditionTypePlatformRequirementsMet,
-		conditionStatus(met), reason, message)
-
-	var reconcileErr error
-	if met {
-		reconcileErr = manifests.ReconcileStack(ctx, r.Client, r.APIReader, r.Scheme, mctx)
-	} else {
-		reconcileErr = fmt.Errorf("%s: %s", reason, message)
-	}
-
-	if reconcileErr != nil {
-		return reconcileErr
+	if err := manifests.ReconcileStack(ctx, r.Client, r.Scheme, mctx); err != nil {
+		return err
 	}
 
 	registered, regErr := r.reconcileConsoleRegistration(ctx, mctx)

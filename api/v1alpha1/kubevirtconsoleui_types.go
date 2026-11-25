@@ -5,23 +5,18 @@ import (
 )
 
 const (
-	ConditionTypeReady                   = "Ready"
-	ConditionTypeProgressing             = "Progressing"
-	ConditionTypeDegraded                = "Degraded"
-	ConditionTypePlatformRequirementsMet = "PlatformRequirementsMet"
+	ConditionTypeReady       = "Ready"
+	ConditionTypeProgressing = "Progressing"
+	ConditionTypeDegraded    = "Degraded"
 )
 
 // KubeVirtConsoleUISpec defines optional day-2 settings for the console UI stack.
 // Operand names, images, and namespace are fixed by the operator (see OPERAND_NAMESPACE and image env vars).
 // Feature toggles and hcoVersion live in the kubevirt-ui-features ConfigMap (operator-managed).
-type KubeVirtConsoleUISpec struct {
-	// Proxy holds optional proxy container flags (for example TLS profile args on OpenShift).
-	Proxy ProxySpec `json:"proxy,omitempty"`
-}
-
-type ProxySpec struct {
-	TLSArgs []string `json:"tlsArgs,omitempty"`
-}
+//
+// TLS settings for the apiserver proxy, the plugin nginx, and the operator metrics endpoint are not configured here:
+// they are derived from the tlsSecurityProfile of apiservers.config.openshift.io/cluster.
+type KubeVirtConsoleUISpec struct{}
 
 // KubeVirtConsoleUIStatus defines observed state.
 type KubeVirtConsoleUIStatus struct {
