@@ -8,11 +8,11 @@ Track reconciliation parity between `helm/kubevirt-console-ui` templates and the
 | `priorityclass.yaml` | PriorityClass | Yes | Cluster-scoped, no owner ref |
 | `serviceaccount-plugin.yaml` | ServiceAccount | Yes | |
 | `serviceaccount-proxy.yaml` | ServiceAccount | Yes | |
-| `configmap-nginx.yaml` | ConfigMap | Yes | `nginx-conf` |
+| `configmap-nginx.yaml` | ConfigMap | Yes | `nginx-conf`; `ssl_protocols`/`ssl_ciphers` derived from APIServer `cluster` `tlsSecurityProfile` |
 | `configmap-user-settings.yaml` | ConfigMap | Yes | |
 | `configmap-ui-features.yaml` | ConfigMap | Yes | |
 | `deployment-plugin.yaml` | Deployment | Yes | SCC `restricted-v2` |
-| `deployment-proxy.yaml` | Deployment | Yes | |
+| `deployment-proxy.yaml` | Deployment | Yes | TLS flags derived from APIServer `cluster` `tlsSecurityProfile`; Helm `proxy.tlsArgs` is Helm-only |
 | `service-plugin.yaml` | Service | Yes | Serving cert annotation |
 | `service-proxy.yaml` | Service | Yes | Serving cert annotation |
 | `networkpolicy-plugin.yaml` | NetworkPolicy | Yes | When `networkPolicy.enabled` |

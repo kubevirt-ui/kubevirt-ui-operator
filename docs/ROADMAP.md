@@ -33,6 +33,7 @@ Install and development assume an **OpenShift** (or OpenShift-compatible) cluste
 
 - Published **plugin** and **apiserver-proxy** images (pin tags; avoid `latest` in production). Reference versions: HCO [`deploy/images.env`](https://github.com/kubevirt/hyperconverged-cluster-operator/blob/main/deploy/images.env) (`KUBEVIRT_CONSOLE_PLUGIN_IMAGE`, `KUBEVIRT_CONSOLE_PROXY_IMAGE`).
 - **Serving certificates:** OpenShift service serving-cert controller (Services annotated with `service.beta.openshift.io/serving-cert-secret-name`).
+- **TLS profile:** the operator follows `apiservers.config.openshift.io/cluster` `tlsSecurityProfile` for the proxy, plugin nginx, and operator metrics endpoint (read/watch RBAC on `apiservers`).
 - **Optional Route:** cluster ingress / apps domain for off-cluster apiserver-proxy access (`route.enabled`).
 
 ### Tooling (developers)
@@ -125,7 +126,7 @@ Unblock parallel contributions before the controller is large.
 |------|----------------|
 | Reliability | Leader election, sensible requeue; finalizers only if console deregistration on delete is required |
 | Security | Minimal operator RBAC; NetworkPolicy defaults documented; SCC `restricted-v2` |
-| TLS | Serving certs; optional proxy `tlsArgs` aligned with cluster TLS profile |
+| TLS | Serving certs; proxy, plugin nginx, and metrics follow the cluster `tlsSecurityProfile` (APIServer `cluster`) |
 | Observability | Structured logs, controller metrics; runbook for common failures |
 | Release | `quay.io/kubevirtui/kubevirt-ui-operator` semver tags, changelog |
 | Compatibility | [docs/COMPATIBILITY.md](COMPATIBILITY.md) — OpenShift versions, plugin/proxy pins |

@@ -38,7 +38,8 @@ func PluginDeployment(m *Context) *appsv1.Deployment {
 			Template: corev1.PodTemplateSpec{
 				Labels: labels.Plugin(m.CR),
 				Annotations: map[string]string{
-					"openshift.io/required-scc": "restricted-v2",
+					"openshift.io/required-scc":     "restricted-v2",
+					names.NginxConfigHashAnnotation: nginxConfigHash(m),
 				},
 				Spec: corev1.PodSpec{
 					ServiceAccountName: names.PluginDeployment,

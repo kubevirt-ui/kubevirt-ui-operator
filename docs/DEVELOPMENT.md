@@ -85,6 +85,8 @@ kubectl apply -f config/samples/consoleui_v1alpha1_kubevirtconsoleui.yaml
 
 If `make deploy` fails building `controller-gen`, ensure Go 1.27+ and use the Makefile’s pinned `CONTROLLER_TOOLS_VERSION` (v0.22.0), or install `controller-gen` on your `PATH`.
 
+TLS for the proxy, plugin nginx, and the operator metrics endpoint is derived from `apiservers.config.openshift.io/cluster` `tlsSecurityProfile` (default Intermediate when unset). There is no CR field for it; to test, edit that object (for example `oc patch apiserver cluster --type=merge -p '{"spec":{"tlsSecurityProfile":{"type":"Modern"}}}'`) and watch the operand rollouts.
+
 Undeploy the operator manager (CRD and CRs remain):
 
 ```bash

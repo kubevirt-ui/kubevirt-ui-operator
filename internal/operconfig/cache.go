@@ -3,11 +3,13 @@ package operconfig
 import (
 	"k8s.io/apimachinery/pkg/fields"
 
+	configv1 "github.com/openshift/api/config/v1"
 	consolev1 "github.com/openshift/api/console/v1"
 	operatorv1 "github.com/openshift/api/operator/v1"
 
 	"github.com/kubevirt-ui/kubevirt-ui-operator/internal/hcoversion"
 	"github.com/kubevirt-ui/kubevirt-ui-operator/internal/names"
+	"github.com/kubevirt-ui/kubevirt-ui-operator/internal/tlsprofile"
 
 	consoleuiv1alpha1 "github.com/kubevirt-ui/kubevirt-ui-operator/api/v1alpha1"
 
@@ -30,6 +32,9 @@ func CacheOptions(cfg Config) cache.Options {
 		},
 		&operatorv1.Console{}: {
 			Field: fields.OneTermEqualSelector("metadata.name", "cluster"),
+		},
+		&configv1.APIServer{}: {
+			Field: fields.OneTermEqualSelector("metadata.name", tlsprofile.APIServerName),
 		},
 	}
 	// HyperConverged is registered only when the CRD exists at startup; otherwise the

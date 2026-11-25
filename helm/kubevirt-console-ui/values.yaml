@@ -36,7 +36,8 @@ proxy:
   serviceName: kubevirt-apiserver-proxy-service
   servingCertSecret: console-proxy-serving-cert
   priorityClassName: kubevirt-ui-cluster-critical
-  # Optional TLS flags passed to the proxy container (HCO sets these from cluster TLS profile).
+  # Helm-only escape hatch: optional TLS flags passed to the proxy container. The operator does not use this
+  # value; it derives TLS from apiservers.config.openshift.io/cluster tlsSecurityProfile.
   tlsArgs: []
 
 consolePlugin:

@@ -20,7 +20,7 @@ A Route for apiserver-proxy is **on by default** (`route.enabled`); disable it i
 **TLS does not depend on NetworkPolicy.** Encryption and serving certificates are configured separately:
 
 - **Plugin and proxy Services** use the OpenShift annotation `service.beta.openshift.io/serving-cert-secret-name`. The serving-cert controller writes TLS material into Secrets; pods mount them (nginx on the plugin uses `/var/serving-cert`).
-- **Optional `proxy.tlsArgs`** pass TLS protocol/cipher flags to the proxy container (HCO aligns these with the cluster TLS profile).
+- **Optional `proxy.tlsArgs`** (Helm-only) pass TLS protocol/cipher flags to the proxy container. The operator has no such setting: it derives TLS for the proxy, plugin nginx, and its own metrics endpoint from `apiservers.config.openshift.io/cluster` `tlsSecurityProfile`.
 - **Route** (`route.enabled`) adds edge TLS when exposing apiserver-proxy outside the cluster.
 
 **NetworkPolicy** is L3/L4 segmentation only: who may connect to the plugin/proxy pods and where the proxy may egress (DNS, Kubernetes API). It does not issue or terminate TLS. Defaults match HCO when network policies are deployed (`networkPolicy.enabled: true`). Set `networkPolicy.enabled: false` on clusters where these rules block legitimate console or API traffic (for example non-standard console labels/namespaces).

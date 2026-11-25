@@ -22,11 +22,11 @@ func ProxyServiceAccount(m *Context) *corev1.ServiceAccount {
 
 func ProxyDeployment(m *Context) *appsv1.Deployment {
 	replicas := int32(1)
-	tlsArgs := m.CR.Spec.Proxy.TLSArgs
 	container := corev1.Container{
 		Name:            names.ProxyDeployment,
 		Image:           m.ProxyImage,
 		ImagePullPolicy: corev1.PullIfNotPresent,
+		Args:            m.TLS.ProxyArgs(),
 		Ports:           []corev1.ContainerPort{{Name: "https", ContainerPort: names.ProxyPort, Protocol: corev1.ProtocolTCP}},
 		Resources: corev1.ResourceRequirements{
 			Requests: corev1.ResourceList{
@@ -42,9 +42,6 @@ func ProxyDeployment(m *Context) *appsv1.Deployment {
 		VolumeMounts: []corev1.VolumeMount{
 			{Name: names.ProxyServingCert, MountPath: "/app/cert", ReadOnly: true},
 		},
-	}
-	if len(tlsArgs) > 0 {
-		container.Args = append([]string{}, tlsArgs...)
 	}
 	return &appsv1.Deployment{
 		Name:      names.ProxyDeployment,

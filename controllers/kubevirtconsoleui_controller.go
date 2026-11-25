@@ -14,6 +14,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
+	configv1 "github.com/openshift/api/config/v1"
 	routev1 "github.com/openshift/api/route/v1"
 
 	consolev1 "github.com/openshift/api/console/v1"
@@ -26,6 +27,7 @@ import (
 	"github.com/kubevirt-ui/kubevirt-ui-operator/internal/names"
 	"github.com/kubevirt-ui/kubevirt-ui-operator/internal/operconfig"
 	"github.com/kubevirt-ui/kubevirt-ui-operator/internal/status"
+	"github.com/kubevirt-ui/kubevirt-ui-operator/internal/tlsprofile"
 )
 
 // KubeVirtConsoleUIReconciler reconciles the console UI stack for a KubeVirtConsoleUI CR.
@@ -33,6 +35,8 @@ type KubeVirtConsoleUIReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 	Config operconfig.Config
+	// MetricsTLS, when set, is updated on every reconcile so the metrics endpoint follows the cluster TLS profile.
+	MetricsTLS *tlsprofile.Holder
 }
 
 // +kubebuilder:rbac:groups=consoleui.kubevirt.io,resources=kubevirtconsoleuis,verbs=get;list;watch;create;update;patch;delete
@@ -46,6 +50,7 @@ type KubeVirtConsoleUIReconciler struct {
 // +kubebuilder:rbac:groups=console.openshift.io,resources=consoleplugins,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=route.openshift.io,resources=routes,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=operator.openshift.io,resources=consoles,verbs=get;list;watch;update;patch
+// +kubebuilder:rbac:groups=config.openshift.io,resources=apiservers,verbs=get;list;watch
 // +kubebuilder:rbac:groups=hco.kubevirt.io,resources=hyperconvergeds,verbs=get;list;watch
 // +kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,verbs=get
 
@@ -54,12 +59,20 @@ func (r *KubeVirtConsoleUIReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		return ctrl.Result{}, nil
 	}
 
+	tlsSettings, err := tlsprofile.FromAPIServer(ctx, r.Client)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	if r.MetricsTLS != nil {
+		r.MetricsTLS.Store(tlsSettings)
+	}
+
 	cr := &consoleuiv1alpha1.KubeVirtConsoleUI{}
 	if err := r.Get(ctx, client.ObjectKey{Name: req.Name}, cr); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	mctx := manifests.NewContext(cr, r.Config)
+	mctx := manifests.NewContext(cr, r.Config, tlsSettings)
 	reconcileErr := r.reconcile(ctx, cr, mctx)
 	deploymentsWaiting := ""
 	if reconcileErr == nil {
@@ -107,6 +120,13 @@ func (r *KubeVirtConsoleUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			handler.EnqueueRequestsFromMapFunc(r.mapConsoleToRequests),
 			builder.WithPredicates(predicate.NewPredicateFuncs(func(o client.Object) bool {
 				return o.GetName() == "cluster"
+			})),
+		).
+		Watches(
+			&configv1.APIServer{},
+			handler.EnqueueRequestsFromMapFunc(r.mapAPIServerToRequests),
+			builder.WithPredicates(predicate.NewPredicateFuncs(func(o client.Object) bool {
+				return o.GetName() == tlsprofile.APIServerName
 			})),
 		)
 
